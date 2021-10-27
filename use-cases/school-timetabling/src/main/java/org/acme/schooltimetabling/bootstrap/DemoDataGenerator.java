@@ -87,13 +87,13 @@ public class DemoDataGenerator {
         timeslotRepository.persist(timeslotList);
 
         List<Room> roomList = new ArrayList<>(3);
-        roomList.add(new Room("Room A"));
-        roomList.add(new Room("Room B"));
-        roomList.add(new Room("Room C"));
+        roomList.add(new Room("Room A", 5, 8));
+        roomList.add(new Room("Room B", 10, 18));
+        roomList.add(new Room("Room C", 7, 3));
         if (demoData == DemoData.LARGE) {
-            roomList.add(new Room("Room D"));
-            roomList.add(new Room("Room E"));
-            roomList.add(new Room("Room F"));
+            roomList.add(new Room("Room D", 5, 10));
+            roomList.add(new Room("Room E", 10, 35));
+            roomList.add(new Room("Room F", 15, 40));
         }
         roomRepository.persist(roomList);
 

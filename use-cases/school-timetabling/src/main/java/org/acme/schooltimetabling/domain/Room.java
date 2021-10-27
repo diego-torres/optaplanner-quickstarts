@@ -32,12 +32,21 @@ public class Room {
 
     private String name;
 
+    private Integer xLocation;
+    private Integer yLocation;
+
     // No-arg constructor required for Hibernate
     public Room() {
     }
 
     public Room(String name) {
         this.name = name.trim();
+    }
+
+    public Room(String name, Integer xLocation, Integer yLocation) {
+        this.name = name.trim();
+        this.xLocation = xLocation;
+        this.yLocation = yLocation;
     }
 
     public Room(long id, String name) {
@@ -62,4 +71,27 @@ public class Room {
         return name;
     }
 
+    public Integer getXLocation() {
+        if(xLocation == null) return 0;
+        return xLocation;
+    }
+
+    public void setXLocation(Integer xLocation) {
+        this.xLocation = xLocation;
+    }
+
+    public Integer getYLocation() {
+        if(yLocation == null) return 0;
+        return yLocation;
+    }
+
+    public void setYLocation(Integer yLocation) {
+        this.yLocation = yLocation;
+    }
+
+    public Long getDistance(Room room) {
+        return Math.round(Math.sqrt( 
+            Math.pow( room.getXLocation() - this.getXLocation() , 2 ) + 
+            Math.pow( room.getYLocation() - this.getYLocation() , 2) ));
+    } 
 }

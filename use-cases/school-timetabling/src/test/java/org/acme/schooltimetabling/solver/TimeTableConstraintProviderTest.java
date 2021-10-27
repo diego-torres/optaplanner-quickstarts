@@ -113,4 +113,19 @@ class TimeTableConstraintProviderTest {
                 .penalizesBy(1); // Second tuesday lesson immediately follows the first.
     }
 
+    @Test
+    public void indianaJonesPreference() {
+        Timeslot TIMESLOT_0900 = new Timeslot(1, DayOfWeek.MONDAY, LocalTime.of(9, 0));
+        Timeslot TIMESLOT_1400 = new Timeslot(1, DayOfWeek.MONDAY, LocalTime.of(14, 0));
+        constraintVerifier.verifyThat(TimeTableConstraintProvider::indianaJonesPreference)
+        .given( new Lesson(1, "History", "Indiana Jones", "Group1", TIMESLOT_0900, ROOM1))
+        .penalizesBy(1);
+        constraintVerifier.verifyThat(TimeTableConstraintProvider::indianaJonesPreference)
+        .given( new Lesson(1, "Archeology", "Indiana Jones", "Group1", TIMESLOT_1400, ROOM1))
+        .penalizesBy(0);
+        constraintVerifier.verifyThat(TimeTableConstraintProvider::indianaJonesPreference)
+        .given( new Lesson(1, "Physics", "Albert Einstein", "Group1", TIMESLOT_0900, ROOM1))
+        .penalizesBy(0);
+    }
+
 }

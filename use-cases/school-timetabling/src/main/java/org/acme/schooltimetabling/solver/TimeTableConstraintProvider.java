@@ -17,6 +17,7 @@
 package org.acme.schooltimetabling.solver;
 
 import java.time.Duration;
+import java.time.LocalTime;
 
 import org.acme.schooltimetabling.domain.Lesson;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
@@ -34,10 +35,12 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 roomConflict(constraintFactory),
                 teacherConflict(constraintFactory),
                 studentGroupConflict(constraintFactory),
+                indianaJonesPreference(constraintFactory),
                 // Soft constraints
                 teacherRoomStability(constraintFactory),
                 teacherTimeEfficiency(constraintFactory),
-                studentGroupSubjectVariety(constraintFactory)
+                studentGroupSubjectVariety(constraintFactory),
+                
         };
     }
 
@@ -95,6 +98,15 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 .reward("Teacher time efficiency", HardSoftScore.ONE_SOFT);
     }
 
+    Constraint indianaJonesPreference(ConstraintFactory constraintFactory) {
+        // Indiana Jones must not teach classes before 10:30 in the morning.
+        return constraintFactory
+                .from(Lesson.class)
+                .filter(lesson -> lesson.getTeacher().equals("Indiana Jones")
+                && lesson.getTimeslot().getStartTime().isBefore(LocalTime.of(10, 30)))
+                .penalize("Indiana Jones Preference", HardSoftScore.ONE_HARD);
+    }
+
     Constraint studentGroupSubjectVariety(ConstraintFactory constraintFactory) {
         // A student group dislikes sequential lessons on the same subject.
         return constraintFactory
@@ -109,6 +121,22 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                     return !between.isNegative() && between.compareTo(Duration.ofMinutes(30)) <= 0;
                 })
                 .penalize("Student group subject variety", HardSoftScore.ONE_SOFT);
+    }
+
+    Constraint minimizeDistance(ConstraintFactory constraintFactory) {
+        // minimize distance for 2 consecutive classes
+        return constraintFactory
+                .from(Lesson.class)
+                .join(Lesson.class,
+                        Joiners.equal(Lesson::getStudentGroup),
+                        Joiners.equal((lesson) -> lesson.getTimeslot().getDayOfWeek()))
+                .filter((lesson1, lesson2) -> {
+                        Duration between = Duration.between(lesson1.getTimeslot().getEndTime(),
+                        lesson2.getTimeslot().getStartTime());
+                        return !between.isNegative() && between.compareTo(Duration.ofMinutes(30)) <= 0;
+                })
+                .penalize("Minimize distance for 2 consecutive classes", HardSoftScore.ONE_SOFT,
+                (lesson1, lesson2) -> lesson1.getRoom().getDistance(lesson2.getRoom()).intValue());
     }
 
 }
